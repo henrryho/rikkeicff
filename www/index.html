@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title>Vinh Trung Coffee Order</title>
+
+    <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+
+    <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
+    <link href="css/ionic.app.css" rel="stylesheet">
+    -->
+
+    <!-- ionic/angularjs js -->
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+    <script src="lib/angular-local-storage/dist/angular-local-storage.js"></script>
+
+
+    <!-- cordova script (this will be a 404 during development) -->
+    <!-- <script src="cordova.js"></script> -->
+    <script src="js/firebase.js"></script>
+    <script src="js/angularfire.min.js"></script>
+
+
+    <!-- your app's js -->
+    <script src="js/app.js"></script>
+
+
+    <!--[if IE]><script type="text/javascript" src="js/excanvas.js"></script><![endif]-->
+    <script type="text/javascript" src="js/coolclock.js"></script>
+    <script type="text/javascript" src="js/moreskins.js"></script>
+
+</head>
+<body ng-app="rikkeicf" ng-controller="main" ng-init="init()" ng-cloak="" onload="CoolClock.findAndCreateClocks()">
+<ion-pane>
+    <ion-header-bar class="bar-light">
+        <!-- Setting button-->
+        <button class="button button-icon" ng-click="showPopupAbout()">
+            <i class="icon ion-navicon"></i>
+        </button>
+        <h1 class="title">ORDER COFFEE ONLINE</h1>
+    </ion-header-bar>
+
+    <ion-content>
+        <div class="card" ng-cloak="">
+            <div class="list animated bounceInLeft">
+                <div class="row row-center responsive-sm">
+                    <div class="col col-25" >
+                        <canvas id="clk1" class="CoolClock:fancy myClock:10"></canvas>
+                    </div>
+                    <div class="col col-50">
+                        <span> Hóa đơn này được tài trợ bởi: <strong>{{sponsorname}}</strong></span><br><br>
+                        <button class="button button-energized" ng-click="orderReset()" id="orderResetButton">Reset</button>
+                        <button class="button button-balanced" ng-click="orderStart()" id="orderStartButton">Kích hoạt Order</button>
+                        <button class="button button-balanced" ng-click="orderStop()" id="orderStopButton">Kết thúc Order</button>
+                        <button class="button button-assertive">{{money}} VNĐ</button><br>
+                        <small style="font-style: italic; color: #666666">※ Chức năng chỉ dành cho nhà tài trợ và admin hệ thống</small>
+                    </div>
+                    <div class="col col-25">
+                    <!--<iframe
+                            src="https://www.goldbroker.fr/widget/live-price/XAU?currency=USD"
+                            width="100%" height="130" style="border: 0; overflow:hidden;"></iframe>-->
+                        <image src="http://lorempixel.com/200/100/food/Rikkei DN"/>
+                    </div>
+                </div>
+            </div>
+            <!--Order result info-->
+            <div class="item item-divider">
+               Thực đơn hôm nay
+            </div>
+            <div class="item chat-item" ng-repeat="menu in menus">
+                <div class="row">
+                    <p><strong>{{menu.foodname}} : {{formatMoney(menu.price)}} <span style="color: red"> {{menu.quantity}}</span></strong></p>
+                </div>
+
+            </div>
+        </div>
+        <div class="row responsive-sm chat-item" ng-repeat="user in users track by $index" ng-switch on="$index %4">
+            <div class="col col-25 animated bounceInLeft" ng-switch-when="0" ng-click="showDetail($index)">
+                        <div ng-switch="users[$index].completed">
+                            <div class="item item-positive" ng-switch-when="true">
+                                <span ng-if="users[$index].priority!=true">{{users[$index].username}}</span>
+                                <span style="color: #11c1f3; font-size: large">{{users[$index].order}}</span>
+                                <p style="color: #e5e5e5">Chúc bạn ngon miệng !</p>
+                            </div>
+                            <div class="item item-dark" ng-switch-when="false" style="font-style: italic">
+                                <span>{{users[$index].username}}</span>
+                                <p>chưa order</p>
+                            </div>
+                        </div>
+             </div>
+                <span class="col col-25 animated bounceInLeft" ng-show="users[$index+1]">
+                    <div ng-switch-when="0" ng-click="showDetail($index+1)">
+                            <div ng-switch="users[$index+1].completed">
+                                <div class="item item-positive" ng-switch-when="true">
+                                    <span ng-if="users[$index+1].priority!=true">{{users[$index+1].username}}</span>
+                                    <span style="color: #11c1f3; font-size: large">{{users[$index+1].order}}</span>
+                                    <p style="color: #e5e5e5">Chúc bạn ngon miệng !</p>
+                                </div>
+                                <div class="item item-dark" ng-switch-when="false" style="font-style: italic">
+                                    <span>{{users[$index+1].username}}</span>
+                                    <p>chưa order</p>
+                                </div>
+                            </div>
+                    </div>
+                </span>
+                <div class="col col-25 animated bounceInLeft" ng-show="users[$index+2]">
+                    <div ng-switch-when="0"  ng-click="showDetail($index+2)">
+                            <div ng-switch="users[$index+2].completed">
+                                <div class="item item-positive" ng-switch-when="true">
+                                    <span ng-if="users[$index+2].priority!=true">{{users[$index+2].username}}</span>
+                                    <span style="color: #11c1f3; font-size: large">{{users[$index+2].order}}</span>
+                                    <p style="color: #e5e5e5">Chúc bạn ngon miệng !</p>
+                                </div>
+                                <div class="item item-dark" ng-switch-when="false" style="font-style: italic">
+                                    <span>{{users[$index+2].username}}</span>
+                                    <p>chưa order</p>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+                <div class="col col-25 animated bounceInLeft" ng-show="users[$index+3]">
+                    <div ng-switch-when="0"  ng-click="showDetail($index+3)">
+                        <div ng-switch="users[$index+3].completed">
+                            <div class="item item-positive" ng-switch-when="true">
+                                <span ng-if="users[$index+3].priority!=true">{{users[$index+3].username}}</span>
+                                <span style="color: #11c1f3; font-size: large">{{users[$index+3].order}}</span>
+                                <p style="color: #e5e5e5">Chúc bạn ngon miệng !</p>
+                            </div>
+                            <div class="item item-dark" ng-switch-when="false" style="font-style: italic">
+                                <span>{{users[$index+3].username}}</span>
+                                <p>chưa order</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </ion-content>
+</ion-pane>
+
+
+<!-- [Order screen] -->
+  <script id="detail-user-modal.html" type="text/ng-template">
+      <div class="modal">
+
+          <!-- Modal header bar -->
+          <ion-header-bar class="bar-secondary">
+              <h1 class="title">THỰC ĐƠN HÔM NAY</h1>
+              <button class="button button-icon" ng-click="closeDetailUser()">
+                  <i class="icon ion-android-close"></i>
+              </button>
+          </ion-header-bar>
+
+          <!-- Modal content area -->
+          <ion-content padding="true" class="has-header">
+                  <ion-list class="">
+                      <ion-item class="item-avatar dark">
+                          <img src="img/coffee.png">
+                          <h2dark><strong>Cafe VĨNH TRUNG</strong></h2dark>
+                      </ion-item>
+                      <div ng-repeat="menu in menus track by $index" ng-cloak="" ng-init="choice.name=menus[0].foodname">
+                            <ion-radio ng-model="choice.name" ng-value="menu.foodname" ng-checked="true">{{menu.foodname}} <span style="font-style: italic;font-size: small">{{formatMoney(menu.price)}}</span></ion-radio>
+                      </div>
+                  </ion-list>
+              <form class="padding">
+                  <button class="button button-block button-calm" ng-click="orderCompleted()">
+                      OK
+                  </button>
+                  <button class="button button-block button-assertive" ng-click="orderCancel()" id="orderCancelButton">
+                      Hủy món
+                  </button>
+              </form>
+
+              </ion-content>
+      </div>
+  </script>
+</body>
+</html>
