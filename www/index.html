@@ -21,12 +21,10 @@
     <script src="js/firebase.js"></script>
     <script src="js/angularfire.min.js"></script>
 
-
     <!-- your app's js -->
     <script src="js/app.js"></script>
-
 </head>
-<body ng-app="rikkeicf" ng-controller="main" ng-init="init()" ng-cloak="" onload="CoolClock.findAndCreateClocks()">
+<body ng-app="rikkeicf" ng-controller="main" ng-init="init()" ng-cloak="">
 <ion-pane>
     <ion-header-bar class="bar-light">
         <!-- Setting button-->
@@ -40,92 +38,97 @@
         <div class="card" ng-cloak="">
             <div class="list animated bounceInLeft">
                 <div class="row row-center responsive-sm">
-                    <div class="col col-50">
+                    <div class="col">
                         <span> Hóa đơn này được tài trợ bởi: <strong>{{sponsorname}}</strong></span><br><br>
                         <button class="button button-energized" ng-click="orderReset()" id="orderResetButton">Reset</button>
                         <button class="button button-balanced" ng-click="orderStart()" id="orderStartButton">Kích hoạt Order</button>
                         <button class="button button-balanced" ng-click="orderStop()" id="orderStopButton">Kết thúc Order</button>
-                        <button class="button button-assertive">{{money}} VNĐ</button><br>
-                        <small style="font-style: italic; color: #666666">※ Chức năng chỉ dành cho nhà tài trợ và admin hệ thống</small>
+                        <button class="button button-assertive">{{sShop[0].money}} VNĐ</button><br>
+                        <small style="font-style: italic; color: #666666">※ Chức năng chỉ dành cho nhà tài trợ và admin</small>
                     </div>
-                    <div class="col col-25">
+                    <div class="col">
                     <!--<iframe
                             src="https://www.goldbroker.fr/widget/live-price/XAU?currency=USD"
                             width="100%" height="130" style="border: 0; overflow:hidden;"></iframe>-->
-                        <image src="http://lorempixel.com/200/100/food/Rikkei DN"/>
+                       <!-- <image src="http://lorempixel.com/600/100/food/Rikkei DN"/>-->
                     </div>
                 </div>
             </div>
             <!--Order result info-->
             <div class="item item-divider">
-               Thực đơn hôm nay
+               Thực đơn hôm nay (gọi số <span style="color: #0c60ee"> {{phonenumber}}</span> để được phục vụ)
             </div>
-            <div class="item chat-item" ng-repeat="menu in menus">
-                <div class="row">
-                    <p><strong>{{menu.foodname}} : {{formatMoney(menu.price)}} <span style="color: red"> {{menu.quantity}}</span></strong></p>
+            <div class="item chat-item" ng-repeat="menu in menus"  ng-if="$index %3 == 0">
+                <div class="row responsive-sm">
+                    <div class="col col-33">
+                        <p ng-if="menus[$index].quantity > 0"><strong>{{menus[$index].foodname}} : {{formatMoney(menus[$index].price)}} <span style="color: red"> {{menus[$index].quantity}}</span></strong></p>
+                        <p ng-if="menus[$index].quantity == 0"><strong>{{menus[$index].foodname}} : {{formatMoney(menus[$index].price)}}</strong></p>
+                    </div>
+                    <div class="col col-33">
+                        <p ng-if="menus[$index+1].quantity > 0"><strong>{{menus[$index+1].foodname}} : {{formatMoney(menus[$index+1].price)}} <span style="color: red"> {{menus[$index+1].quantity}}</span></strong></p>
+                        <p ng-if="menus[$index+1].quantity == 0"><strong>{{menus[$index+1].foodname}} : {{formatMoney(menus[$index+1].price)}}</strong></p>
+                    </div>
+                    <div class="col col-33">
+                        <p ng-if="menus[$index+2].quantity > 0"><strong>{{menus[$index+2].foodname}} : {{formatMoney(menus[$index+2].price)}} <span style="color: red"> {{menus[$index+2].quantity}}</span></strong></p>
+                        <p ng-if="menus[$index+2].quantity == 0"><strong>{{menus[$index+2].foodname}} : {{formatMoney(menus[$index+2].price)}}</strong></p>
+                    </div>
                 </div>
-
             </div>
         </div>
-        <div class="row responsive-sm chat-item" ng-repeat="user in users track by $index" ng-switch on="$index %4">
-            <div class="col col-25 animated bounceInLeft" ng-switch-when="0" ng-click="showDetail($index)">
-                        <div ng-switch="users[$index].completed">
-                            <div class="item item-positive" ng-switch-when="true">
-                                <span ng-if="users[$index].priority!=true">{{users[$index].username}}</span>
-                                <span style="color: #11c1f3; font-size: large">{{users[$index].order}}</span>
-                                <p style="color: #e5e5e5">Chúc bạn ngon miệng !</p>
-                            </div>
-                            <div class="item item-dark" ng-switch-when="false" style="font-style: italic">
-                                <span>{{users[$index].username}}</span>
-                                <p>chưa order</p>
-                            </div>
-                        </div>
+        <div class="row  responsive-sm chat-item" ng-repeat="user in users track by $index" ng-if="$index %4 ==0">
+            <div class="card col col-24 animated bounceInLeft" ng-click="showDetail($index)">
+                <div ng-switch="users[$index].completed">
+                    <div class="item item-positive" ng-switch-when="true">
+                        <span ng-if="users[$index].priority!=true">{{users[$index].username}}</span>
+                        <span style="color: #11c1f3; font-size: large">{{users[$index].order}}</span>
+                        <p style="color: #e5e5e5">Chúc bạn ngon miệng !</p>
+                    </div>
+                    <div class="item item-dark" ng-switch-when="false" style="font-style: italic">
+                        <span>{{users[$index].username}}</span>
+                        <p>chưa order</p>
+                    </div>
+                </div>
              </div>
-                <span class="col col-25 animated bounceInLeft" ng-show="users[$index+1]">
-                    <div ng-switch-when="0" ng-click="showDetail($index+1)">
-                            <div ng-switch="users[$index+1].completed">
-                                <div class="item item-positive" ng-switch-when="true">
-                                    <span ng-if="users[$index+1].priority!=true">{{users[$index+1].username}}</span>
-                                    <span style="color: #11c1f3; font-size: large">{{users[$index+1].order}}</span>
-                                    <p style="color: #e5e5e5">Chúc bạn ngon miệng !</p>
-                                </div>
-                                <div class="item item-dark" ng-switch-when="false" style="font-style: italic">
-                                    <span>{{users[$index+1].username}}</span>
-                                    <p>chưa order</p>
-                                </div>
-                            </div>
+             <div class="card col col-24 animated bounceInLeft" ng-click="showDetail($index+1)">
+                <div ng-switch="users[$index+1].completed">
+                    <div class="item item-positive" ng-switch-when="true">
+                        <span ng-if="users[$index+1].priority!=true">{{users[$index+1].username}}</span>
+                        <span style="color: #11c1f3; font-size: large">{{users[$index+1].order}}</span>
+                        <p style="color: #e5e5e5">Chúc bạn ngon miệng !</p>
                     </div>
-                </span>
-                <div class="col col-25 animated bounceInLeft" ng-show="users[$index+2]">
-                    <div ng-switch-when="0"  ng-click="showDetail($index+2)">
-                            <div ng-switch="users[$index+2].completed">
-                                <div class="item item-positive" ng-switch-when="true">
-                                    <span ng-if="users[$index+2].priority!=true">{{users[$index+2].username}}</span>
-                                    <span style="color: #11c1f3; font-size: large">{{users[$index+2].order}}</span>
-                                    <p style="color: #e5e5e5">Chúc bạn ngon miệng !</p>
-                                </div>
-                                <div class="item item-dark" ng-switch-when="false" style="font-style: italic">
-                                    <span>{{users[$index+2].username}}</span>
-                                    <p>chưa order</p>
-                                </div>
-                            </div>
+                    <div class="item item-dark" ng-switch-when="false" style="font-style: italic">
+                        <span>{{users[$index+1].username}}</span>
+                        <p>chưa order</p>
                     </div>
                 </div>
-                <div class="col col-25 animated bounceInLeft" ng-show="users[$index+3]">
-                    <div ng-switch-when="0"  ng-click="showDetail($index+3)">
-                        <div ng-switch="users[$index+3].completed">
-                            <div class="item item-positive" ng-switch-when="true">
-                                <span ng-if="users[$index+3].priority!=true">{{users[$index+3].username}}</span>
-                                <span style="color: #11c1f3; font-size: large">{{users[$index+3].order}}</span>
-                                <p style="color: #e5e5e5">Chúc bạn ngon miệng !</p>
-                            </div>
-                            <div class="item item-dark" ng-switch-when="false" style="font-style: italic">
-                                <span>{{users[$index+3].username}}</span>
-                                <p>chưa order</p>
-                            </div>
-                        </div>
+            </div>
+            <div class="card col col-24 animated bounceInLeft" ng-click="showDetail($index+2)">
+                <div ng-switch="users[$index+2].completed">
+                    <div class="item item-positive" ng-switch-when="true">
+                        <span ng-if="users[$index+2].priority!=true">{{users[$index+2].username}}</span>
+                        <span style="color: #11c1f3; font-size: large">{{users[$index+2].order}}</span>
+                        <p style="color: #e5e5e5">Chúc bạn ngon miệng !</p>
+                    </div>
+                    <div class="item item-dark" ng-switch-when="false" style="font-style: italic">
+                        <span>{{users[$index+2].username}}</span>
+                        <p>chưa order</p>
                     </div>
                 </div>
+            </div>
+            <div class="card col col-24 animated bounceInLeft" ng-click="showDetail($index+3)">
+                <div ng-switch="users[$index+3].completed">
+                    <div class="item item-positive" ng-switch-when="true">
+                        <span ng-if="users[$index+3].priority!=true">{{users[$index+3].username}}</span>
+                        <span style="color: #11c1f3; font-size: large">{{users[$index+3].order}}</span>
+                        <p style="color: #e5e5e5">Chúc bạn ngon miệng !</p>
+                    </div>
+                    <div class="item item-dark" ng-switch-when="false" style="font-style: italic">
+                        <span>{{users[$index+3].username}}</span>
+                        <p>chưa order</p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </ion-content>
 </ion-pane>
@@ -134,7 +137,6 @@
 <!-- [Order screen] -->
   <script id="detail-user-modal.html" type="text/ng-template">
       <div class="modal">
-
           <!-- Modal header bar -->
           <ion-header-bar class="bar-secondary">
               <h1 class="title">THỰC ĐƠN HÔM NAY</h1>
@@ -154,15 +156,10 @@
                             <ion-radio ng-model="choice.name" ng-value="menu.foodname" ng-checked="true">{{menu.foodname}} <span style="font-style: italic;font-size: small">{{formatMoney(menu.price)}}</span></ion-radio>
                       </div>
                   </ion-list>
-              <form class="padding">
-                  <button class="button button-block button-calm" ng-click="orderCompleted()">
-                      OK
-                  </button>
-                  <button class="button button-block button-assertive" ng-click="orderCancel()" id="orderCancelButton">
-                      Hủy món
-                  </button>
-              </form>
-
+              <div class ="button-bar">
+                  <a class="button button-block button-assertive" ng-click="orderCancel()" id="orderCancelButton">Hủy món</a>
+                  <a class="button button-block button-calm" ng-click="orderCompleted()">OK</a>
+              </div>
               </ion-content>
       </div>
   </script>
